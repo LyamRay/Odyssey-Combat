@@ -35,7 +35,7 @@ public final class OdysseyCombat extends JavaPlugin {
         } catch (SQLException exception) {
             throw new RuntimeException("Failed to disable the database properly! " + exception);
         }
-        getLogger().finest("The BeeSim Core has shutdown successfully!");
+        getLogger().finest("The plugin has shutdown successfully!");
     }
 
     public void checkFolderAndConnect() {
