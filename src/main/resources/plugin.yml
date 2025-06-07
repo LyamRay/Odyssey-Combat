@@ -1,0 +1,7 @@
+name: Odyssey Combat
+version: '1.0'
+main: me.lyamray.odysseyCombat.OdysseyCombat
+api-version: '1.21'
+load: STARTUP
+authors: [ LyamRay ]
+description: Combat plugin made by LyamRay for Odyssey Kingdom!
