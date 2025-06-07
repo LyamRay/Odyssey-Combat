@@ -15,12 +15,6 @@ public class Database {
             statement.execute("""
                         CREATE TABLE IF NOT EXISTS players (
                             uuid TEXT PRIMARY KEY,
-                            bees INTEGER NOT NULL DEFAULT 0,
-                            honey INTEGER NOT NULL DEFAULT 0,
-                            bees_available INTEGER NOT NULL DEFAULT 1,
-                            honey_available INTEGER NOT NULL DEFAULT 5,
-                            field_level INTEGER NOT NULL DEFAULT 1,
-                            hive_location TEXT
                         );
                     """);
         }
