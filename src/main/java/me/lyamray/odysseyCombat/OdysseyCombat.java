@@ -2,6 +2,8 @@ package me.lyamray.odysseyCombat;
 
 import lombok.Getter;
 import me.lyamray.odysseyCombat.database.Database;
+import me.lyamray.odysseyCombat.listeners.PlayerJoinListener;
+import me.lyamray.odysseyCombat.listeners.PlayerLeaveListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -11,7 +13,7 @@ import java.util.Arrays;
 public final class OdysseyCombat extends JavaPlugin {
 
     @Getter
-    private static OdysseyCombat instace;
+    private static OdysseyCombat instance;
 
     @Getter
     private static Database database;
@@ -19,7 +21,7 @@ public final class OdysseyCombat extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-        instace = this;
+        instance = this;
         checkFolderAndConnect();
         registerListener();
         getLogger().info("The plugin has started successfully!");
@@ -29,7 +31,6 @@ public final class OdysseyCombat extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-
         try {
             database.closeConnection();
         } catch (SQLException exception) {
@@ -58,7 +59,8 @@ public final class OdysseyCombat extends JavaPlugin {
 
     public void registerListener() {
         Arrays.asList(
-
+                new PlayerJoinListener(),
+                new PlayerLeaveListener()
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 }
