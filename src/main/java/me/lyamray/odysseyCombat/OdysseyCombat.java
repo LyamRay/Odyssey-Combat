@@ -25,7 +25,6 @@ public final class OdysseyCombat extends JavaPlugin {
         checkFolderAndConnect();
         registerListener();
         getLogger().info("The plugin has started successfully!");
-        //Objects.requireNonNull(getCommand("gui")).setExecutor(new YARAM());
     }
 
     @Override
