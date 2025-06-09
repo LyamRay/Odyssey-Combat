@@ -1,4 +1,4 @@
-name: Odyssey Combat
+name: Odyssey-Combat
 version: '1.0'
 main: me.lyamray.odysseyCombat.OdysseyCombat
 api-version: '1.21'

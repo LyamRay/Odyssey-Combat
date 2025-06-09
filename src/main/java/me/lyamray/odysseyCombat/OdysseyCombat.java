@@ -2,6 +2,7 @@ package me.lyamray.odysseyCombat;
 
 import lombok.Getter;
 import me.lyamray.odysseyCombat.database.Database;
+import me.lyamray.odysseyCombat.listeners.PlayerHitListener;
 import me.lyamray.odysseyCombat.listeners.PlayerJoinListener;
 import me.lyamray.odysseyCombat.listeners.PlayerLeaveListener;
 import org.bukkit.Bukkit;
@@ -59,7 +60,8 @@ public final class OdysseyCombat extends JavaPlugin {
     public void registerListener() {
         Arrays.asList(
                 new PlayerJoinListener(),
-                new PlayerLeaveListener()
+                new PlayerLeaveListener(),
+                new PlayerHitListener()
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 }

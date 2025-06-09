@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.lyamray</groupId>
-    <artifactId>OdysseyCombat</artifactId>
+    <artifactId>Odyssey-Combat</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
@@ -73,6 +73,11 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.21.0</version>
         </dependency>
     </dependencies>
 </project>

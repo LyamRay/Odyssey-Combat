@@ -22,6 +22,12 @@ public class Database {
         }
     }
 
+    public void isPlayerCombatTagged() {
+
+    }
+
+
+
     public void closeConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();

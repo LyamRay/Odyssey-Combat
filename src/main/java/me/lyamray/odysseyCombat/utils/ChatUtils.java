@@ -12,7 +12,6 @@ public class ChatUtils {
         return miniMessage.deserialize(message);
     }
 
-    public String componentToString (Component component) {
-        return miniMessage.serialize(component);
+    public String componentToString (Component component) { return miniMessage.serialize(component);
     }
 }
