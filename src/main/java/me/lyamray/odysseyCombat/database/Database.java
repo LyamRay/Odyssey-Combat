@@ -65,6 +65,15 @@ public class Database {
         return false;
     }
 
+    public void setInventoryContents(UUID uuid, String base64) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE players SET contents = ? WHERE uuid = ?")) {
+            statement.setString(1, base64);
+            statement.setString(2, uuid.toString());
+            statement.executeUpdate();
+        }
+    }
+
     public void closeConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();
