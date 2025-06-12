@@ -2,6 +2,7 @@ package me.lyamray.odysseyCombat.listeners;
 
 import me.lyamray.odysseyCombat.OdysseyCombat;
 import me.lyamray.odysseyCombat.database.Database;
+import me.lyamray.odysseyCombat.managers.Base64Manager;
 import me.lyamray.odysseyCombat.utils.BossBarTimer;
 import me.lyamray.odysseyCombat.utils.CombatMessages;
 import org.bukkit.GameMode;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 public class PlayerHitListener implements Listener {
 
-    @EventHandler(priority =  EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerHit(EntityDamageByEntityEvent event) throws SQLException {
         if (!(event.getEntity() instanceof Player victim)) return;
 
@@ -60,7 +61,6 @@ public class PlayerHitListener implements Listener {
     }
 
     private void cantDo(Player victim, Player attacker, EntityDamageByEntityEvent event) throws SQLException {
-
         if (!(victim.getGameMode() == GameMode.SURVIVAL) || !(attacker.getGameMode() == GameMode.SURVIVAL)) return;
 
         if (event.isCancelled() || event.getFinalDamage() <= 0) return;
@@ -69,18 +69,18 @@ public class PlayerHitListener implements Listener {
     }
 
     private void handlePlayerCombatTag(Player player, Database database, BossBarTimer bossBarTimer) throws SQLException {
-
         UUID uuid = player.getUniqueId();
         boolean isInCombat = database.isPlayerCombatTagged(uuid);
 
         if (!isInCombat) {
             database.setPlayerCombattagged(uuid, true);
-            bossBarTimer.startTimer(player);
+            bossBarTimer.startTimer(player, 20);
 
         } else {
-            bossBarTimer.updateTimer(player);
+            bossBarTimer.updateTimer(player, 20);
         }
     }
+
 
     private boolean isInCombat(Player player) throws SQLException {
         return !OdysseyCombat.getDatabase().isPlayerCombatTagged(player.getUniqueId());
