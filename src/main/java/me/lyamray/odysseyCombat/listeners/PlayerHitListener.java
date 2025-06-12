@@ -8,15 +8,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 import java.sql.SQLException;
-
+import java.util.UUID;
 
 public class PlayerHitListener implements Listener {
 
-    @EventHandler
+    @EventHandler(priority =  EventPriority.HIGHEST)
     public void onPlayerHit(EntityDamageByEntityEvent event) throws SQLException {
         if (!(event.getEntity() instanceof Player victim)) return;
 
@@ -28,28 +29,51 @@ public class PlayerHitListener implements Listener {
 
         if (!(damager instanceof Player attacker)) return;
 
-        isAlreadyInCombat(victim, attacker);
+        if (event.isCancelled() || event.getFinalDamage() <= 0) return;
+
+        handleInCombat(victim, attacker);
     }
 
-    private void isAlreadyInCombat(Player victim, Player attacker) throws SQLException {
-        BossBarTimer bossBarTimer = new BossBarTimer();
+    private void setCombatTaggedTrue(Player victim, Player attacker) throws SQLException {
         Database database = OdysseyCombat.getDatabase();
+        database.setPlayerCombattagged(victim.getUniqueId(), true);
+        database.setPlayerCombattagged(attacker.getUniqueId(), true);
+    }
 
-        boolean victimTagged = database.isPlayerCombatTagged(victim.getUniqueId());
-        boolean attackerTagged = database.isPlayerCombatTagged(attacker.getUniqueId());
+    private void handleInCombat(Player victim, Player attacker) throws SQLException {
+        Database database = OdysseyCombat.getDatabase();
+        BossBarTimer bossBarTimer = BossBarTimer.getInstance();
 
-        if (victimTagged || attackerTagged) {
-            victim.sendMessage("Je bent al in combat, geen extra message maar wel de bossbar die terug vol wordt! //debug");
-            bossBarTimer.updateTimer(victim, 20);
-            bossBarTimer.updateTimer(attacker, 20);
+        if (isInCombat(attacker)) {
+            CombatMessages.combatHitMessage(victim.getName(), attacker);
+        }
+
+        if (isInCombat(victim)) {
+            CombatMessages.combatGetHitMessage(attacker.getName(), victim);
+        }
+
+        handlePlayerCombatTag(victim, database, bossBarTimer);
+        handlePlayerCombatTag(attacker, database, bossBarTimer);
+
+        setCombatTaggedTrue(victim, attacker);
+
+    }
+
+    private void handlePlayerCombatTag(Player player, Database database, BossBarTimer bossBarTimer) throws SQLException {
+
+        UUID uuid = player.getUniqueId();
+        boolean isInCombat = database.isPlayerCombatTagged(uuid);
+
+        if (!isInCombat) {
+            database.setPlayerCombattagged(uuid, true);
+            bossBarTimer.startTimer(player);
 
         } else {
-
-            CombatMessages.combatGetHitMessage(attacker.getName(), victim);
-            CombatMessages.combatHitMessage(victim.getName(), attacker);
-
-            bossBarTimer.startTimer(victim, 20);
-            bossBarTimer.startTimer(attacker, 20);
+            bossBarTimer.updateTimer(player);
         }
+    }
+
+    private boolean isInCombat(Player player) throws SQLException {
+        return !OdysseyCombat.getDatabase().isPlayerCombatTagged(player.getUniqueId());
     }
 }

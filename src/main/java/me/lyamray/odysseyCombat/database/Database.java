@@ -20,7 +20,36 @@ public class Database {
         }
     }
 
+    public boolean existsPlayer(UUID uuid) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT uuid FROM players WHERE uuid = ?")) {
+            statement.setString(1, uuid.toString());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
 
+    public void addPlayer(UUID uuid) throws SQLException {
+        if (!existsPlayer(uuid)) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                        INSERT INTO players (uuid, contents, combatTagged)
+                        VALUES (?, ?, 0);
+                    """)) {
+                statement.setString(1, uuid.toString());
+                statement.executeUpdate();
+            }
+        }
+    }
+
+    public void setPlayerCombattagged(UUID uuid, boolean combattagged) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE players SET combatTagged = ? WHERE uuid = ?")) {
+            statement.setBoolean(1, combattagged);
+            statement.setString(2, uuid.toString());
+            statement.executeUpdate();
+        }
+    }
 
     public boolean isPlayerCombatTagged(UUID uuid) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(

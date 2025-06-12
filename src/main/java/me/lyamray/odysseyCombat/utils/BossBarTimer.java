@@ -1,40 +1,62 @@
 package me.lyamray.odysseyCombat.utils;
 
+import lombok.Getter;
 import me.lyamray.odysseyCombat.OdysseyCombat;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class BossBarTimer {
 
+    @Getter
+    private static final BossBarTimer instance = new BossBarTimer();
+
     private final Map<UUID, BossBar> bossBars = new HashMap<>();
     private final Map<UUID, BukkitRunnable> timers = new HashMap<>();
 
-    public void startTimer(Player player, int durationSeconds) {
+    private BossBarTimer() {}
+
+    public void startTimer(Player player) throws SQLException {
         UUID uuid = player.getUniqueId();
 
         if (timers.containsKey(uuid)) {
             timers.get(uuid).cancel();
+            timers.remove(uuid);
+            player.hideBossBar(bossBars.get(uuid));
+            bossBars.remove(uuid);
         }
 
-        BossBar bar = bossBars.computeIfAbsent(uuid, id -> {
-            BossBar newBar = BossBar.bossBar(
-                    ChatUtils.color("<gradient:#ff0000:#df6d78>In Combat - Log niet uit!</gradient>"),
-                    1.0f,
-                    BossBar.Color.RED,
-                    BossBar.Overlay.PROGRESS
-            );
-            player.showBossBar(newBar);
-            return newBar;
-        });
+        createBossBar(player);
+    }
 
-        final int totalTicks = durationSeconds * 20;
+    private void createBossBar(Player player) {
+        UUID uuid = player.getUniqueId();
 
-        BukkitRunnable task = new BukkitRunnable() {
+        BossBar bar = BossBar.bossBar(
+                ChatUtils.color("<gradient:#ff0000:#df6d78>In Combat - Log niet uit!</gradient>"),
+                1.0f,
+                BossBar.Color.RED,
+                BossBar.Overlay.PROGRESS
+        );
+
+        bossBars.put(uuid, bar);
+        player.showBossBar(bar);
+
+        BukkitRunnable task = getBukkitRunnable(player, bar, uuid);
+        timers.put(uuid, task);
+        task.runTaskTimer(OdysseyCombat.getInstance(), 0L, 1L);
+    }
+
+    private @NotNull BukkitRunnable getBukkitRunnable(Player player, BossBar bar, UUID uuid) {
+        final int totalTicks = 20 * 20;
+
+        return new BukkitRunnable() {
             int ticksLeft = totalTicks;
 
             @Override
@@ -43,6 +65,11 @@ public class BossBarTimer {
                     player.hideBossBar(bar);
                     bossBars.remove(uuid);
                     timers.remove(uuid);
+                    try {
+                        setCombatTaggedFalse(player);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
                     cancel();
                     return;
                 }
@@ -52,24 +79,33 @@ public class BossBarTimer {
                 ticksLeft--;
             }
         };
-
-        task.runTaskTimer(OdysseyCombat.getInstance(), 0L, 1L);
-        timers.put(uuid, task);
     }
 
-    public void updateTimer(Player player, int durationSeconds) {
-        startTimer(player, durationSeconds);
+    private void setCombatTaggedFalse(Player player) throws SQLException {
+        player.sendMessage("Je bent uit combat! //debug");
+        OdysseyCombat.getDatabase().setPlayerCombattagged(player.getUniqueId(), false);
     }
 
-    public void cancelTimer(Player player) {
+    public void updateTimer(Player player) throws SQLException {
+        if (!isInCombat(player)) return;
+
         UUID uuid = player.getUniqueId();
         if (timers.containsKey(uuid)) {
+            BossBar bar = bossBars.get(uuid);
+            if (bar != null) {
+                bar.progress(1.0f);
+            }
+
             timers.get(uuid).cancel();
-            timers.remove(uuid);
+            BukkitRunnable newTask = getBukkitRunnable(player, bossBars.get(uuid), uuid);
+            timers.put(uuid, newTask);
+            newTask.runTaskTimer(OdysseyCombat.getInstance(), 0L, 1L);
+        } else {
+            startTimer(player);
         }
-        if (bossBars.containsKey(uuid)) {
-            player.hideBossBar(bossBars.get(uuid));
-            bossBars.remove(uuid);
-        }
+    }
+
+    private boolean isInCombat(Player player) throws SQLException {
+        return OdysseyCombat.getDatabase().isPlayerCombatTagged(player.getUniqueId());
     }
 }
