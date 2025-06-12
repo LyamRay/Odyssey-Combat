@@ -1,5 +1,9 @@
 package me.lyamray.odysseyCombat.database;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+
 import java.sql.*;
 import java.util.UUID;
 
@@ -15,6 +19,7 @@ public class Database {
                             uuid TEXT PRIMARY KEY,
                             contents TEXT,
                             armorContents TEXT,
+                            lastLocation TEXT,
                             combatTagged BOOLEAN NOT NULL DEFAULT 0
                         );
                     """);
@@ -34,8 +39,8 @@ public class Database {
     public void addPlayer(UUID uuid) throws SQLException {
         if (!existsPlayer(uuid)) {
             try (PreparedStatement statement = connection.prepareStatement("""
-                        INSERT INTO players (uuid, contents, armorContents,combatTagged)
-                        VALUES (?, ?, ?, 0);
+                        INSERT INTO players (uuid, contents, armorContents, lastLocation, combatTagged)
+                        VALUES (?, ?, ?, ?, 0);
                     """)) {
                 statement.setString(1, uuid.toString());
                 statement.executeUpdate();
@@ -84,9 +89,54 @@ public class Database {
         }
     }
 
+    public Location getLastLocation(UUID uuid) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT lastLocation FROM players WHERE uuid = ?")) {
+            statement.setString(1, uuid.toString());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return parseLocation(resultSet.getString("lastLocation"));
+                }
+            }
+        }
+        return null;
+    }
+
+    public void setLastLocation(UUID uuid, Location location) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE players SET lastLocation = ? WHERE uuid = ?")) {
+            statement.setString(1, location == null ? null : serializeLocation(location));
+            statement.setString(2, uuid.toString());
+            statement.executeUpdate();
+        }
+    }
+
     public void closeConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();
+        }
+    }
+    private String serializeLocation(Location location) {
+        if (location == null || location.getWorld() == null) return null;
+        return String.format("%s,%d,%d,%d",
+                location.getWorld().getName(),
+                location.getBlockX(),
+                location.getBlockY(),
+                location.getBlockZ());
+    }
+
+    public Location parseLocation(String locationString) {
+        if (locationString == null || locationString.isEmpty()) return null;
+        try {
+            String[] parts = locationString.split(",");
+            World world = Bukkit.getWorld(parts[0]);
+            int x = Integer.parseInt(parts[1]);
+            int y = Integer.parseInt(parts[2]);
+            int z = Integer.parseInt(parts[3]);
+            return new Location(world, x, y, z);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

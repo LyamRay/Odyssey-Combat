@@ -83,13 +83,6 @@
             <artifactId>citizens-main</artifactId>
             <version>2.0.38-SNAPSHOT</version>
             <type>jar</type>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>
