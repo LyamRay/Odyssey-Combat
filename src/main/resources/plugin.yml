@@ -4,5 +4,5 @@ main: me.lyamray.odysseyCombat.OdysseyCombat
 api-version: '1.21'
 load: STARTUP
 authors: [ LyamRay ]
-depend: [Citizens]
+softdepend: [Citizens]
 description: Combat plugin made by LyamRay for Odyssey Kingdom!
