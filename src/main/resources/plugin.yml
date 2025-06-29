@@ -1,5 +1,5 @@
 name: Odyssey-Combat
-version: '1.0'
+version: '1.1'
 main: me.lyamray.odysseyCombat.OdysseyCombat
 api-version: '1.21'
 load: STARTUP

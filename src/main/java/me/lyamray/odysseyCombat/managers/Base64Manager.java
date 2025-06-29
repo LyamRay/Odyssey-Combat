@@ -39,7 +39,6 @@ public class Base64Manager {
 
     private String toBase64Armor(ItemStack[] armor) {
         List<Map<String, Object>> serializedArmor = new ArrayList<>();
-
         for (ItemStack item : armor) {
             serializedArmor.add(item != null ? item.serialize() : null);
         }

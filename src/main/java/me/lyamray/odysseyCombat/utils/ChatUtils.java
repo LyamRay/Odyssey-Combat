@@ -6,7 +6,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @UtilityClass
 public class ChatUtils {
-    private static final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public Component color(String message) {
         return miniMessage.deserialize(message);
